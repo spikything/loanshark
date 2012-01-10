@@ -51,8 +51,9 @@
 		
 		private var _ObjectClass :Class;
 		private var _size :int;
-		private var _buffer :int;
-		private var _list :Array;
+		private var _bufferSize :int;
+		private var _pool :Array;
+		private var _objectsInUse :Array;
 		private var _maxBuffer :uint;
 		private var _initObject :Object;
 		private var _resetMethod :String;
@@ -97,9 +98,17 @@
 		 */
 		public function borrowObject():*
 		{
-			if (_buffer == 0)
-				return createObject();
-			return _list[--_buffer];
+			var objectToReturn:*;
+			
+			if (_bufferSize == 0)
+				objectToReturn = createObject();
+			else
+				objectToReturn = _pool[--_bufferSize];
+			
+			if (_strictMode)
+				_objectsInUse.push(objectToReturn);
+			
+			return objectToReturn;
 		}
 		
 		/**
@@ -109,9 +118,16 @@
 		public function returnObject(object:*):void
 		{
 			var isCorrectType:Boolean = object is _ObjectClass;
+			
 			var isAlreadyCheckedIn:Boolean = false;
 			if (_strictMode)
-				isAlreadyCheckedIn = _list.indexOf(object) > -1;
+			{
+				var usageIndex:int = _objectsInUse.indexOf(object);
+				if (usageIndex == -1)
+					isAlreadyCheckedIn = true;
+				else
+					_objectsInUse.splice(usageIndex, 1);
+			}
 			
 			if (object && isCorrectType && used > 0 && !isAlreadyCheckedIn)
 			{
@@ -132,7 +148,7 @@
 					throw new Error('You cannot return an object to the pool when it\'s already checked-in.', ERROR_MULTI_CHECK_IN);
 			}
 			
-			if (_maxBuffer && _buffer > _maxBuffer)
+			if (_maxBuffer && _bufferSize > _maxBuffer)
 				clean();
 		}
 		
@@ -149,7 +165,7 @@
 		 */
 		public function get unused():int
 		{
-			return _buffer;
+			return _bufferSize;
 		}
 		
 		/**
@@ -157,7 +173,7 @@
 		 */
 		public function get used():int
 		{
-			return _size - _buffer;
+			return _size - _bufferSize;
 		}
 		
 		/**
@@ -173,7 +189,7 @@
 		 */
 		public function clean():void
 		{
-			var unused:uint = _buffer;
+			var unused:uint = _bufferSize;
 			
 			if (unused > 0)
 			{
@@ -181,7 +197,7 @@
 				disposeObjects();
 				createList();
 				
-				_buffer = 0;
+				_bufferSize = 0;
 				_size -= cleanCount;
 			}
 			
@@ -201,7 +217,7 @@
 			if (disposeUnusedObjects)
 				disposeObjects();
 			
-			_size = _buffer = 0;
+			_size = _bufferSize = 0;
 			createList();
 			
 			dispatch(EVENT_FLUSHED);
@@ -216,7 +232,8 @@
 			
 			_ObjectClass = null;
 			_initObject = null;
-			_list = null;
+			_pool = null;
+			_objectsInUse = null;
 			_resetMethod = null;
 			_disposeMethod = null;
 			
@@ -242,7 +259,8 @@
 		
 		private function createList():void
 		{
-			_list = new Array(_idealArrayInitialSize);
+			_pool = new Array(_idealArrayInitialSize);
+			_objectsInUse = new Array();
 		}
 		
 		private function disposeObjects():void
@@ -251,9 +269,9 @@
 				return;
 			
 			var obj:Object;
-			for (var i:int = 0; i < _buffer; i++)
+			for (var i:int = 0; i < _bufferSize; i++)
 			{
-				obj = _list[i];
+				obj = _pool[i];
 				if (obj)
 					obj[_disposeMethod]();
 			}
@@ -269,7 +287,7 @@
 			if (reset && _resetMethod != '')
 				object[_resetMethod]();
 			
-			_list[_buffer++] = object;
+			_pool[_bufferSize++] = object;
 		}
 		
 		private function createObject():*
