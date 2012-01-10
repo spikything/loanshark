@@ -247,6 +247,19 @@ package org.kissmyas.utils.loanshark
 			Assert.assertTrue("Expected Error was not thrown on returning the same object to the pool twice", errorThrown);
         }
 		
+        [Test(description="LoanShark should now throw an error when an object is checked out and straight back into a pool with initial size > 0")]
+        public function strictMode_InitialSize_GetPutCheck():void
+        {
+            //given
+			var strictMode:Boolean = true;
+			var initialPoolSize:uint = 10;
+            var sut:LoanShark = new LoanShark(TestObject, strictMode, initialPoolSize);
+			
+			//when
+            var testObject:TestObject = sut.borrowObject();
+			sut.returnObject(testObject);
+        }
+		
         [Test(description="LoanShark should empty and become unusable, ready for destruction after LoanShark.dispose() is called")]
         public function objectDisposal():void
         {
@@ -579,6 +592,7 @@ package org.kissmyas.utils.loanshark
 			uniqueErrorIDs();
 			strictMode_checkIn_whenNo_checkOuts();
 			strictMode_GetOnce_PutMultiple();
+			strictMode_InitialSize_GetPutCheck();
             poolUsage();
             poolPrune();
             poolFlush();
