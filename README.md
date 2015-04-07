@@ -4,11 +4,11 @@ HOW TO USE IT
 
 Especially useful with custom classes that are heavy to construct, simply instaniate a LoanShark instance, passing in your class of choice. You can then borrowObject and returnObject at will, the LoanShark will manage the reuse and allocation of objects in an efficient manner - making lighter work for your garbage collector:
 
-import org.kissmyas.utils.loanshark.LoanShark;
-
-var pool:LoanShark = new LoanShark(SomeClass);
-var someInstance:SomeClass = pool.borrowObject();
-pool.returnObject(someInstance);
+    import org.kissmyas.utils.loanshark.LoanShark;
+    
+    var pool:LoanShark = new LoanShark(SomeClass);
+    var someInstance:SomeClass = pool.borrowObject();
+    pool.returnObject(someInstance);
 
 A bunch of other options are available. Just check out the code to find out how to do:
 
