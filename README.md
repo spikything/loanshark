@@ -1,6 +1,6 @@
 LoanShark is a flexible and high-performance object pooling utility, written in AS3. It is battle-hardened, fully unit tested and actively maintained.
 
-HOW TO USE IT
+# How to use it #
 
 Especially useful with custom classes that are heavy to construct, simply instaniate a LoanShark instance, passing in your class of choice. You can then borrowObject and returnObject at will, the LoanShark will manage the reuse and allocation of objects in an efficient manner - making lighter work for your garbage collector:
 
@@ -18,3 +18,22 @@ A bunch of other options are available. Just check out the code to find out how 
   * Maximum pool wastage prune triggering
   * Listening for events from the pool
   * Exception triggers with strict mode
+
+# Examples #
+
+- Create a pool of Bitmaps, which all wrap the same BitmapData, by default
+
+```
+// Given any BitmapData
+var bitmapData:BitmapData;
+
+// Create a pool a Bitmap objects, with 'bitmapData' as the default init object
+var pool:LoanShark = new LoanShark(Bitmap, false, 0, 0, bitmapData);
+
+// You can get as many Bitmaps from the pool as necessary
+var bitmap:Bitmap = pool.borrowObject();
+addChild(bitmap);
+
+// When done with it, recycle it back into the pool
+pool.returnObject(removeChild(bitmap));
+```
