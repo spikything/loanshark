@@ -1,6 +1,6 @@
 LoanShark is a flexible and high-performance object pooling utility, written in AS3. It is battle-hardened, fully unit tested and actively maintained.
 
-### PLEASE NOTE: This repo is no longer maintained. However, depsite the fact that Flash is long dead, the AS3 code here is actually useful since it is the most test-covered object pooling utility available and AS3 projects may still be built using the Harman AIR SDK for building mobile apps, or https://github.com/ruffle-rs/ruffle/ for websites/desktop.
+### PLEASE NOTE: This repo is no longer maintained. However, despite the fact that Flash is officially defunct, the AS3 code here is actually useful since it is the most test-covered object pooling utility available and AS3 projects may still be built using the Harman AIR SDK for building mobile apps, or old Flash projects brught back to life using https://github.com/ruffle-rs/ruffle/ for web/desktop.
 
 # How to use it #
 
